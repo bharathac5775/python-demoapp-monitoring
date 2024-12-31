@@ -39,7 +39,6 @@ jobs:
           name: Run Tests
           command: make test
 
-
   build-image:
     executor: docker-executor
     environment:
@@ -59,6 +58,23 @@ jobs:
           name: Push Docker Image
           command: docker push $IMAGE_NAME:$IMAGE_TAG
 
+  run-container:
+    executor: docker-executor
+    environment:
+      IMAGE_NAME: bacdocker/pythondemoapp
+      IMAGE_TAG: v1
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Pull Docker Image
+          command: docker pull $IMAGE_NAME:$IMAGE_TAG
+      - run:
+          name: Run Docker Container
+          command: docker run -it -d -p 3001:3000 $IMAGE_NAME:$IMAGE_TAG
+      - run:
+          name: List Running Containers
+          command: docker ps
+
 workflows:
   version: 2
   test-and-deploy:
@@ -70,3 +86,6 @@ workflows:
       - build-image:
           requires:
             - run-tests
+      - run-container:
+          requires:
+            - build-image
