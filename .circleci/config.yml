@@ -66,19 +66,33 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
-      # - run:
-      #     name: Set SSH Key Permissions
-      #     command: |
-      #       chmod 400 "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
+            - "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"  # Correct fingerprint of the SSH key
+      - run:
+          name: Debug SSH Setup
+          command: |
+            echo "Checking SSH keys..."
+            echo "User: $(whoami)"
+            echo "Home Directory: $HOME"
+            ls -la $HOME/.ssh  # List the contents of the .ssh directory relative to the home
+            cat $HOME/.ssh/id_rsa || echo "id_rsa not found"  # Show the key (if it exists) or print a message
+      - run:
+          name: Set SSH Key Permissions
+          command: |
+            if [ -f $HOME/.ssh/id_rsa ]; then
+              chmod 400 $HOME/.ssh/id_rsa  # Set the correct permissions if the key exists
+            else
+              echo "id_rsa not found"  # Print a message if the key doesn't exist
+            fi
       - run:
           name: Deploy to EC2
           command: |
+            # Make sure you are using the correct user (ubuntu for Ubuntu instances, ec2-user for Amazon Linux)
             printf "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD\n\
             docker pull $IMAGE_NAME:$IMAGE_TAG\n\
             docker stop my-app || true\n\
             docker rm my-app || true\n\
             docker run -it -d --name my-app -p 3000:3000 $IMAGE_NAME:$IMAGE_TAG\n" | ssh -T -o StrictHostKeyChecking=no ubuntu@54.234.73.51
+
 
 
   # deploy-to-ec2:
