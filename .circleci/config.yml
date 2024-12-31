@@ -58,34 +58,47 @@ jobs:
           name: Push Docker Image
           command: docker push $IMAGE_NAME:$IMAGE_TAG
 
-  run-container:
+  deploy-to-ec2:
     executor: docker-executor
     environment:
       IMAGE_NAME: bacdocker/pythondemoapp
       IMAGE_TAG: v1
     steps:
-      - setup_remote_docker
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
       - run:
-          name: Pull Docker Image
-          command: docker pull $IMAGE_NAME:$IMAGE_TAG
-      - run:
-          name: Run Docker Container
-          command: docker run -it -d -p 3001:3000 $IMAGE_NAME:$IMAGE_TAG
-      - run:
-          name: List Running Containers
-          command: docker ps
+          name: Deploy to EC2
+          command: |
+            ssh -o StrictHostKeyChecking=no ubuntu@54.234.73.51  << EOF
+              docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+              docker pull $IMAGE_NAME:$IMAGE_TAG
+              docker stop my-app || true
+              docker rm my-app || true
+              docker run -it -d --name my-app -p 3000:3000 $IMAGE_NAME:$IMAGE_TAG
+            EOF
+
+# workflows:
+#   version: 2
+#   test-and-deploy:
+#     jobs:
+#       - run-lints
+#       - run-tests:
+#           requires:
+#             - run-lints
+#       - build-image:
+#           requires:
+#             - run-tests
+#       - deploy-to-ec2:
+#           requires:
+#             - build-image
 
 workflows:
   version: 2
   test-and-deploy:
     jobs:
-      - run-lints
-      - run-tests:
-          requires:
-            - run-lints
-      - build-image:
-          requires:
-            - run-tests
-      - run-container:
-          requires:
-            - build-image
+      - deploy-to-ec2:
+          filters:
+            branches:
+              only: circleci-project-setup  # You can also specify a branch like `master` or any other branch where you want this job to run
+          trigger: manual
