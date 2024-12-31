@@ -67,10 +67,10 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
-      - run:
-          name: Set SSH Key Permissions
-          command: |
-            chmod 400 "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
+      # - run:
+      #     name: Set SSH Key Permissions
+      #     command: |
+      #       chmod 400 "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
       - run:
           name: Deploy to EC2
           command: |
