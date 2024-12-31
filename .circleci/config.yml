@@ -70,9 +70,7 @@ jobs:
       - run:
           name: Set SSH Key Permissions
           command: |
-            ls -la ~/.ssh  # List the contents of the .ssh directory
-            cat ~/.ssh/id_rsa
-            chmod 400 ~/.ssh/id_rsa
+            chmod 400 "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
       - run:
           name: Deploy to EC2
           command: |
