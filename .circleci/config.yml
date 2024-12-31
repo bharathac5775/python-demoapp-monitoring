@@ -119,5 +119,7 @@ workflows:
       - deploy-to-ec2:
           filters:
             branches:
-              only: circleci-project-setup  # You can also specify a branch like `master` or any other branch where you want this job to run
-          trigger: manual
+              only: circleci-project-setup  # Specify the branch to trigger this job
+          requires: []
+          manual: true  # This makes the job manual
+
