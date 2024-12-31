@@ -97,29 +97,29 @@ jobs:
   #           EOF
 
 
-# workflows:
-#   version: 2
-#   test-and-deploy:
-#     jobs:
-#       - run-lints
-#       - run-tests:
-#           requires:
-#             - run-lints
-#       - build-image:
-#           requires:
-#             - run-tests
-#       - deploy-to-ec2:
-#           requires:
-#             - build-image
-
 workflows:
   version: 2
   test-and-deploy:
     jobs:
+      - run-lints
+      - run-tests:
+          requires:
+            - run-lints
+      - build-image:
+          requires:
+            - run-tests
       - deploy-to-ec2:
-          filters:
-            branches:
-              only: circleci-project-setup  # Specify the branch to trigger this job
-          requires: []
-          manual: true  # This makes the job manual
+          requires:
+            - build-image
+
+# workflows:
+#   version: 2
+#   test-and-deploy:
+#     jobs:
+#       - deploy-to-ec2:
+#           filters:
+#             branches:
+#               only: circleci-project-setup  # Specify the branch to trigger this job
+#           requires: []
+#           manual: true  # This makes the job manual
 
