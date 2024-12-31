@@ -70,7 +70,7 @@ jobs:
       - run:
           name: Deploy to EC2
           command: |
-            ssh -o StrictHostKeyChecking=no ubuntu@54.234.73.51 << EOF
+            ssh -o StrictHostKeyChecking=no ubuntu@54.234.73.51 <<EOF
               docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
               docker pull $IMAGE_NAME:$IMAGE_TAG
               docker stop my-app || true
