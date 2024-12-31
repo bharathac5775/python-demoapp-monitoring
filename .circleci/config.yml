@@ -39,8 +39,12 @@ jobs:
           name: Run Tests
           command: make test
 
+
   build-image:
     executor: docker-executor
+    environment:
+      IMAGE_NAME: bacdocker/pythondemoapp
+      IMAGE_TAG: v1
     steps:
       - checkout
       - setup_remote_docker
@@ -54,9 +58,8 @@ jobs:
       - run:
           name: Push Docker Image
           command: docker push $IMAGE_NAME:$IMAGE_TAG
-      - run:
-          name: Run Docker Image Locally
-          command: docker run -it -d -p 3001:3000 $IMAGE_NAME:$IMAGE_TAG
+
+
 
 workflows:
   version: 2
