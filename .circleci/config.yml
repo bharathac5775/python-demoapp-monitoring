@@ -68,13 +68,18 @@ jobs:
           fingerprints:
             - "SHA256:tcVMUmDZaQJHuYJMncYIUog42wLkZ5EHjw2ROxtnnDE"
       - run:
+          name: Set SSH Key Permissions
+          command: |
+            chmod 400 ~/.ssh/id_rsa
+      - run:
           name: Deploy to EC2
           command: |
             printf "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD\n\
             docker pull $IMAGE_NAME:$IMAGE_TAG\n\
             docker stop my-app || true\n\
             docker rm my-app || true\n\
-            docker run -it -d --name my-app -p 3000:3000 $IMAGE_NAME:$IMAGE_TAG\n" | ssh -o StrictHostKeyChecking=no ubuntu@54.234.73.51
+            docker run -it -d --name my-app -p 3000:3000 $IMAGE_NAME:$IMAGE_TAG\n" | ssh -T -o StrictHostKeyChecking=no ubuntu@54.234.73.51
+
 
   # deploy-to-ec2:
   #   executor: docker-executor
