@@ -1,39 +1,71 @@
-# This config was automatically generated from your source code
-# Stacks detected: cicd:github-actions:.github/workflows,deps:python:src
 version: 2.1
-orbs:
-  python: circleci/python@2
+
+executors:
+  python-executor:
+    docker:
+      - image: cimg/python:3.9
+    working_directory: ~/repo
+
+  docker-executor:
+    docker:
+      - image: docker:20.10.16
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
+    working_directory: ~/repo
+
 jobs:
-  test-python:
-    # Install dependencies and run tests
-    docker:
-      - image: cimg/python:3.8-node
-    working_directory: ~/project/src
+  run-lints:
+    executor: python-executor
     steps:
-      - checkout:
-          path: ~/project
-      - python/install-packages
+      - checkout
       - run:
-          name: Run tests
-          command: pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
-      - store_test_results:
-          path: junit.xml
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
-    docker:
-      - image: cimg/base:stable
+          name: Install Make
+          command: |
+            sudo apt-get update && sudo apt-get install -y make
+      - run:
+          name: Run Linting
+          command: make lint
+
+  run-tests:
+    executor: python-executor
     steps:
-      # Replace this with steps to deploy to users
+      - checkout
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          name: Install Make
+          command: |
+            sudo apt-get update && sudo apt-get install -y make
       - run:
-          name: found github actions config
-          command: ':'
+          name: Run Tests
+          command: make test
+
+  build-image:
+    executor: docker-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Log in to Docker Registry
+          command: |
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - run:
+          name: Build Docker Image
+          command: docker build -t $IMAGE_NAME:$IMAGE_TAG .
+      - run:
+          name: Push Docker Image
+          command: docker push $IMAGE_NAME:$IMAGE_TAG
+      - run:
+          name: Run Docker Image Locally
+          command: docker run -it -d -p 3001:3000 $IMAGE_NAME:$IMAGE_TAG
+
 workflows:
-  build-and-test:
+  version: 2
+  test-and-deploy:
     jobs:
-      - test-python
-    # - deploy:
-    #     requires:
-    #       - test-python
+      - run-lints
+      - run-tests:
+          requires:
+            - run-lints
+      - build-image:
+          requires:
+            - run-tests
