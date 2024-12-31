@@ -59,8 +59,6 @@ jobs:
           name: Push Docker Image
           command: docker push $IMAGE_NAME:$IMAGE_TAG
 
-
-
 workflows:
   version: 2
   test-and-deploy:
