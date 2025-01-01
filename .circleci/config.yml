@@ -126,9 +126,9 @@ workflows:
       - build-image:
           requires:
             - run-tests
-      # - deploy-to-ec2:
-      #     requires:
-      #       - build-image
+      - deploy-to-ec2:
+          requires:
+            - build-image
 
 # workflows:
 #   version: 2
