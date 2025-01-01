@@ -111,7 +111,7 @@ jobs:
             docker pull $IMAGE_NAME:$IMAGE_TAG\n\
             docker stop my-app || true\n\
             docker rm my-app || true\n\
-            docker run -it -d --name my-app -p 3000:3000 $IMAGE_NAME:$IMAGE_TAG\n" | ssh -o StrictHostKeyChecking=no ubuntu@44.202.133.46
+            docker run -it -d --name my-app -p 5000:5000 $IMAGE_NAME:$IMAGE_TAG\n" | ssh -o StrictHostKeyChecking=no ubuntu@44.202.133.46
 
 
 
